@@ -1,0 +1,85 @@
+version: "3.8"
+# 起動するサービス（コンテナ）の定義
+services:
+  # データベースサービスの定義
+  db:
+    # PostgresSQLのバージョン15のDockerイメージを使用
+    image: postgres:15
+    # コンテナ名を「reservation-db」に設定
+    container_name: reservation-db
+    # PostgresSQLの環境変数設定
+    environment:
+      POSTGRES_DB: reservation      # 使用するデータベース名
+      POSTGRES_USER: postgres       # データベースユーザー名
+      POSTGRES_PASSWORD: postgres   # データベースパスワード
+    # ボリュームのマウント設定
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # データの永続化用ボリューム
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # 初期化SQLスクリプト
+    # ポートマッピング（ホスト:コンテナ）
+    ports:
+      - "5432:5432"  # PostgresSQLの標準ポート
+    # 所属するネットワーク
+    networks:
+      - reservation-network
+    # コンテナの再起動ポリシー（異常終了時に再起動）
+    restart: unless-stopped
+    # M1 Macの場合、platform指定が必要な場合があります
+    platform: linux/amd64
+
+  # バックエンドサービスの定義
+  backend:
+    # バックエンドディレクトリのDockerfileでイメージをビルド
+    build: ./backend
+    # コンテナ名を「reservation-backend」に設定
+    container_name: reservation-backend
+    # DBサービスが起動した後に起動するよう依存関係を設定
+    depends_on:
+      - db
+    # Spring Bootアプリケーションの環境変数設定
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/reservation  # DB接続URL
+      SPRING_DATASOURCE_USERNAME: postgres                          # DB接続ユーザー名
+      SPRING_DATASOURCE_PASSWORD: postgres                          # DB接続パスワード
+      SPRING_PROFILES_ACTIVE: dev                                   # 開発環境プロファイル
+    # ポートマッピング（ホスト:コンテナ）
+    ports:
+      - "8080:8080"  # Spring Bootの標準ポート
+    # ボリュームのマウント設定
+    volumes:
+      - ./backend:/app  # ソースコードのマウント（ホットリロード用）
+      - maven-repo:/root/.m2  # Mavenリポジトリのキャッシュ
+    # 所属するネットワーク
+    networks:
+      - reservation-network
+    # コンテナの再起動ポリシー
+    restart: unless-stopped
+
+  # フロントエンドサービスの定義
+  frontend:
+    # フロントエンドディレクトリのDockerfileでイメージをビルド
+    build: ./frontend
+    # コンテナ名を「reservation-frontend」に設定
+    container_name: reservation-frontend
+    # ポートマッピング（ホスト:コンテナ）
+    ports:
+      - "5173:5173"  # Viteの標準ポート
+    # ボリュームのマウント設定
+    volumes:
+      - ./frontend:/app  # ソースコードのマウント（ホットリロード用）
+      - /app/node_modules  # node_modulesはコンテナ内のものを使用（マウントしない）
+    # 所属するネットワーク
+    networks:
+      - reservation-network
+    # コンテナの再起動ポリシー
+    restart: unless-stopped
+
+# コンテナ間の通信用ネットワークの定義
+networks:
+  reservation-network:
+    driver: bridge  # ブリッジネットワークを使用（コンテナ間の通信を可能にする）
+
+# 永続化データを保存するボリュームの定義
+volumes:
+  postgres-data:  # PostgreSQLのデータを永続化
+  maven-repo:     # Mavenのキャッシュを永続化

@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    # データベース接続URL - PostgresSQLデータベースに接続するための設定
+    # db:5432 はデータベースのホスト名とポート番号、reservationはデータベース名
+    url: jdbc:postgresql://db:5432/reservation
+    # データベースへの接続ユーザー名
+    username: postgres
+    # データベース接続パスワード（本番環境では環境変数などから取得することを推奨）
+    password: postgres
+    # JDBCドライバークラス - PostgresSQL用のドライバーを指定
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # データベーススキーマの自動生成設定
+      # validate: 既存のスキーマと一致するか検証するだけで変更はしない
+      # 他の選択肢: create, create-drop, update, none
+      ddl-auto: validate  # 本番環境ではvalidateを使用（スキーマは手動管理）
+    # SQLクエリをログに出力するかどうか
+    show-sql: true
+    properties:
+      hibernate:
+        # 出力されるSQLを読みやすく整形するかどうか
+        format_sql: true
+        # 使用するデータベース方言 - PostgresSQL固有の機能を利用するための設定
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    user:
+      # Spring Securityの基本認証ユーザー名
+      name: admin
+      # Spring Securityの基本認証パスワード
+      password: admin  # 開発環境用の一時的なパスワード
+server:
+  # アプリケーションが動作するポート番号
+  port: 8080
+logging:
+  level:
+    # ログレベルの設定 - DEBUGはより詳細なログ情報を出力
+    # Spring Securityのデバッグログを有効化
+    org.springframework.security: DEBUG
+    # Hibernateが発行するSQLのログを有効化
+    org.hibernate.SQL: DEBUG
+    # アプリケーション固有のパッケージのログレベル設定
+    com.example.reservation: DEBUG
