@@ -45,7 +45,7 @@ export interface Reservation {
   startTime: string;
   endTime: string;
   purpose: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'CONFIRMED'; // CONFIRMED is legacy support
   user?: User;
   facility?: Facility;
 }

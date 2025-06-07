@@ -84,8 +84,10 @@ const ReservationList: React.FC<ReservationListProps> = ({
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'CONFIRMED': return '承認済み';
+      case 'APPROVED': return '承認済み';
+      case 'CONFIRMED': return '承認済み'; // 旧形式サポート
       case 'PENDING': return '承認待ち';
+      case 'REJECTED': return '拒否';
       case 'CANCELLED': return 'キャンセル';
       default: return status;
     }
@@ -162,7 +164,7 @@ const ReservationList: React.FC<ReservationListProps> = ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={
-                        reservation.status === 'CONFIRMED' ? 'status-confirmed' :
+                        (reservation.status === 'APPROVED' || reservation.status === 'CONFIRMED') ? 'status-confirmed' :
                         reservation.status === 'PENDING' ? 'status-pending' :
                         'status-cancelled'
                       }>
@@ -179,13 +181,13 @@ const ReservationList: React.FC<ReservationListProps> = ({
                         {user?.role === 'ADMIN' && reservation.status === 'PENDING' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(reservation.id, 'CONFIRMED')}
+                              onClick={() => handleStatusUpdate(reservation.id, 'APPROVED')}
                               className="btn-success text-xs px-2 py-1"
                             >
                               承認
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(reservation.id, 'CANCELLED')}
+                              onClick={() => handleStatusUpdate(reservation.id, 'REJECTED')}
                               className="btn-danger text-xs px-2 py-1"
                             >
                               拒否
