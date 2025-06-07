@@ -124,4 +124,30 @@ public class UserServiceImpl implements UserService {
         // ユーザーを削除
         userRepository.deleteById(id);
     }
+
+    /**
+     * 指定されたユーザー名が既に存在するかどうかを確認する
+     *
+     * @param username 確認するユーザー名
+     * @return ユーザー名が既に存在する場合はtrue、存在しない場合はfalse
+     */
+    @Override
+    public boolean existsByUsername(String username) {
+        // ユーザーリポジトリを使用して、指定されたユーザー名が既にデータベースに存在するかを確認
+        // 存在する場合はtrueを返し、存在しない場合はfalseを返す
+        return userRepository.existsByUsername(username);
+    }
+
+    /**
+     * 指定されたメールアドレスが既に存在するかどうかを確認する
+     *
+     * @param email 確認するメールアドレス
+     * @return メールアドレスが既に存在する場合はtrue、存在しない場合はfalse
+     */
+    @Override
+    public boolean existsByEmail(String email) {
+        // ユーザーリポジトリを使用して、指定されたメールアドレスが既にデータベースに存在するかを確認
+        // 存在する場合はtrueを返し、存在しない場合はfalseを返す
+        return userRepository.existsByEmail(email);
+    }
 }
