@@ -26,6 +26,7 @@ const ReservationList: React.FC<ReservationListProps> = ({
   const loadReservations = async () => {
     try {
       setIsLoading(true);
+      setError('');
       let response;
       
       if (userId) {
@@ -36,9 +37,21 @@ const ReservationList: React.FC<ReservationListProps> = ({
         response = await reservationApi.getAll();
       }
       
-      setReservations(response.data);
+      setReservations(response.data || []);
     } catch (err: any) {
-      setError('予約の読み込みに失敗しました');
+      console.error('Reservation loading error:', err);
+      let errorMessage = '';
+      if (err.response?.status === 403) {
+        errorMessage = '認証が必要です。ログインし直してください。';
+      } else if (err.response?.status === 401) {
+        errorMessage = '認証が無効です。ログインし直してください。';
+      } else {
+        errorMessage = err.response?.data?.message || 
+                      (typeof err.response?.data === 'string' ? err.response.data : '') ||
+                      `予約の読み込みに失敗しました (${err.response?.status || 'Network Error'})`;
+      }
+      setError(errorMessage);
+      setReservations([]);
     } finally {
       setIsLoading(false);
     }
@@ -68,14 +81,6 @@ const ReservationList: React.FC<ReservationListProps> = ({
     return new Date(dateTime).toLocaleString('ja-JP');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'CONFIRMED': return 'green';
-      case 'PENDING': return 'orange';
-      case 'CANCELLED': return 'red';
-      default: return 'gray';
-    }
-  };
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -86,81 +91,124 @@ const ReservationList: React.FC<ReservationListProps> = ({
     }
   };
 
-  if (isLoading) return <div>読み込み中...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <span className="ml-2 text-gray-600 dark:text-gray-400">読み込み中...</span>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded">
+      {error}
+    </div>
+  );
 
   return (
-    <div className="reservation-list">
-      <h2>予約一覧</h2>
-      
-      {reservations.length === 0 ? (
-        <p>予約がありません。</p>
-      ) : (
-        <div className="reservations-table">
-          <table>
-            <thead>
-              <tr>
-                <th>施設名</th>
-                <th>開始日時</th>
-                <th>終了日時</th>
-                <th>利用目的</th>
-                <th>ステータス</th>
-                {!userId && <th>予約者</th>}
-                {showActions && <th>操作</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {reservations.map((reservation) => (
-                <tr key={reservation.id}>
-                  <td>{reservation.facility?.name || '不明'}</td>
-                  <td>{formatDateTime(reservation.startTime)}</td>
-                  <td>{formatDateTime(reservation.endTime)}</td>
-                  <td>{reservation.purpose}</td>
-                  <td>
-                    <span 
-                      className="status-badge" 
-                      style={{ color: getStatusColor(reservation.status) }}
-                    >
-                      {getStatusText(reservation.status)}
-                    </span>
-                  </td>
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">予約一覧</h2>
+        
+        {reservations.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            予約がありません。
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    施設名
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    開始日時
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    終了日時
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    利用目的
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    ステータス
+                  </th>
                   {!userId && (
-                    <td>{reservation.user?.username || '不明'}</td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      予約者
+                    </th>
                   )}
                   {showActions && (
-                    <td className="actions">
-                      {user?.role === 'ADMIN' && reservation.status === 'PENDING' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusUpdate(reservation.id, 'CONFIRMED')}
-                            className="approve-btn"
-                          >
-                            承認
-                          </button>
-                          <button
-                            onClick={() => handleStatusUpdate(reservation.id, 'CANCELLED')}
-                            className="reject-btn"
-                          >
-                            拒否
-                          </button>
-                        </>
-                      )}
-                      {(user?.role === 'ADMIN' || reservation.userId === user?.id) && (
-                        <button
-                          onClick={() => handleDelete(reservation.id)}
-                          className="delete-btn"
-                        >
-                          削除
-                        </button>
-                      )}
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      操作
+                    </th>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {reservations.map((reservation) => (
+                  <tr key={reservation.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {reservation.facilityName || '不明'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {formatDateTime(reservation.startTime)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {formatDateTime(reservation.endTime)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate">
+                      {reservation.purpose}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={
+                        reservation.status === 'CONFIRMED' ? 'status-confirmed' :
+                        reservation.status === 'PENDING' ? 'status-pending' :
+                        'status-cancelled'
+                      }>
+                        {getStatusText(reservation.status)}
+                      </span>
+                    </td>
+                    {!userId && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {reservation.username || '不明'}
+                      </td>
+                    )}
+                    {showActions && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        {user?.role === 'ADMIN' && reservation.status === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => handleStatusUpdate(reservation.id, 'CONFIRMED')}
+                              className="btn-success text-xs px-2 py-1"
+                            >
+                              承認
+                            </button>
+                            <button
+                              onClick={() => handleStatusUpdate(reservation.id, 'CANCELLED')}
+                              className="btn-danger text-xs px-2 py-1"
+                            >
+                              拒否
+                            </button>
+                          </>
+                        )}
+                        {(user?.role === 'ADMIN' || reservation.userId === user?.id) && (
+                          <button
+                            onClick={() => handleDelete(reservation.id)}
+                            className="btn-danger text-xs px-2 py-1"
+                          >
+                            削除
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

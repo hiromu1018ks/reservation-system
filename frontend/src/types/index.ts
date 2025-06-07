@@ -40,12 +40,12 @@ export interface Reservation {
   id: number;
   userId: number;
   facilityId: number;
+  facilityName: string;
+  username: string;
   startTime: string;
   endTime: string;
   purpose: string;
   status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-  createdAt: string;
-  updatedAt: string;
   user?: User;
   facility?: Facility;
 }

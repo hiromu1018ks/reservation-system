@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 予約情報に関するデータアクセスを提供するリポジトリインターフェース
@@ -33,6 +34,45 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      * @return 指定されたユーザーに関連する予約のリスト
      */
     List<Reservation> findByUserId(Long userId);
+
+    /**
+     * ユーザーIDに基づいて予約を検索し、施設とユーザー情報を一緒に取得するメソッド
+     * JOIN FETCHを使用してLazyInitializationExceptionを回避
+     *
+     * @param userId 検索対象のユーザーID
+     * @return 指定されたユーザーに関連する予約のリスト（施設とユーザー情報を含む）
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.facility JOIN FETCH r.user WHERE r.user.id = :userId")
+    List<Reservation> findByUserIdWithFacilityAndUser(@Param("userId") Long userId);
+
+    /**
+     * 施設IDに基づいて予約を検索し、施設とユーザー情報を一緒に取得するメソッド
+     * JOIN FETCHを使用してLazyInitializationExceptionを回避
+     *
+     * @param facilityId 検索対象の施設ID
+     * @return 指定された施設に関連する予約のリスト（施設とユーザー情報を含む）
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.facility JOIN FETCH r.user WHERE r.facility.id = :facilityId")
+    List<Reservation> findByFacilityIdWithFacilityAndUser(@Param("facilityId") Long facilityId);
+
+    /**
+     * 全ての予約を検索し、施設とユーザー情報を一緒に取得するメソッド
+     * JOIN FETCHを使用してLazyInitializationExceptionを回避
+     *
+     * @return 全予約のリスト（施設とユーザー情報を含む）
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.facility JOIN FETCH r.user")
+    List<Reservation> findAllWithFacilityAndUser();
+
+    /**
+     * IDに基づいて予約を検索し、施設とユーザー情報を一緒に取得するメソッド
+     * JOIN FETCHを使用してLazyInitializationExceptionを回避
+     *
+     * @param id 検索対象の予約ID
+     * @return 指定された予約（施設とユーザー情報を含む）
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.facility JOIN FETCH r.user WHERE r.id = :id")
+    Optional<Reservation> findByIdWithFacilityAndUser(@Param("id") Long id);
 
     /**
      * 指定された時間範囲と施設IDに基づいて重複する予約を検索するメソッド

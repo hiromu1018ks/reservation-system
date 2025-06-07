@@ -48,7 +48,7 @@ public class ReservationServiceImpl implements ReservationService {
      */
     @Override
     public ReservationDTO findById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdWithFacilityAndUser(id)
                 .orElseThrow(() -> new ResourceNotFoundException("予約が見つかりませんでした: " + id));
         return ReservationDTO.fromEntity(reservation);
     }
@@ -60,7 +60,7 @@ public class ReservationServiceImpl implements ReservationService {
      */
     @Override
     public List<ReservationDTO> findAll() {
-        return reservationRepository.findAll().stream()
+        return reservationRepository.findAllWithFacilityAndUser().stream()
                 .map(ReservationDTO::fromEntity)  // エンティティからDTOへの変換
                 .collect(Collectors.toList());
     }
@@ -73,7 +73,7 @@ public class ReservationServiceImpl implements ReservationService {
      */
     @Override
     public List<ReservationDTO> findByFacilityId(Long facilityId) {
-        return reservationRepository.findByFacilityId(facilityId).stream()
+        return reservationRepository.findByFacilityIdWithFacilityAndUser(facilityId).stream()
                 .map(ReservationDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -86,7 +86,7 @@ public class ReservationServiceImpl implements ReservationService {
      */
     @Override
     public List<ReservationDTO> findByUserId(Long userId) {
-        return reservationRepository.findByUserId(userId).stream()
+        return reservationRepository.findByUserIdWithFacilityAndUser(userId).stream()
                 .map(ReservationDTO::fromEntity)
                 .collect(Collectors.toList());
     }

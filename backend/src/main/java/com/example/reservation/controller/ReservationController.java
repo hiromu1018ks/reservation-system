@@ -3,6 +3,7 @@ package com.example.reservation.controller;
 import com.example.reservation.model.dto.ReservationCreateDTO;
 import com.example.reservation.model.dto.ReservationDTO;
 import com.example.reservation.model.entity.Reservation;
+import com.example.reservation.security.CustomUserDetailsService;
 import com.example.reservation.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -137,15 +138,17 @@ public class ReservationController {
 
     /**
      * UserDetailsからユーザーIDを抽出するヘルパーメソッド
-     * 実際の実装はSpring Securityの設定によって異なる場合があります
+     * CustomUserDetailsからユーザーIDを取得する
      *
      * @param userDetails 認証されたユーザーの詳細情報
      * @return ユーザーID
      */
     private Long extractUserIdFromUserDetails(UserDetails userDetails) {
-        // この実装は仮のものです。実際の実装はユーザー詳細の保存方法によって異なります。
-        // カスタムUserDetailsを使用している場合は、そこからIDを取得できます。
-        // ここでは簡単のため、ダミーの実装を提供しています。
-        return 1L; // 実際の実装ではこのようにハードコードしないでください
+        if (userDetails instanceof CustomUserDetailsService.CustomUserDetails) {
+            CustomUserDetailsService.CustomUserDetails customUserDetails = 
+                (CustomUserDetailsService.CustomUserDetails) userDetails;
+            return customUserDetails.getUser().getId();
+        }
+        throw new IllegalArgumentException("Unsupported UserDetails type");
     }
 }

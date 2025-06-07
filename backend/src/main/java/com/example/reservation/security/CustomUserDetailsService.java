@@ -146,5 +146,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         public boolean isEnabled() {
             return true;
         }
+
+        /**
+         * ユーザーエンティティを取得
+         *
+         * @return ユーザーエンティティ
+         */
+        public User getUser() {
+            return user;
+        }
     }
 }

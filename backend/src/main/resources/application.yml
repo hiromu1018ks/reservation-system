@@ -1,12 +1,12 @@
 spring:
   datasource:
     # データベース接続URL - PostgresSQLデータベースに接続するための設定
-    # localhost:5432 はデータベースのホスト名とポート番号、reservationはデータベース名
-    url: jdbc:postgresql://localhost:5432/reservation
+    # localhost:5432 はデータベースのホスト名とポート番号、reservation_systemはデータベース名
+    url: jdbc:postgresql://localhost:5432/reservation_system
     # データベースへの接続ユーザー名
-    username: postgres
-    # データベース接続パスワード（本番環境では環境変数などから取得することを推奨）
-    password: postgres
+    username: ${USER}
+    # データベース接続パスワード（ローカル環境では認証不要）
+    password:
     # JDBCドライバークラス - PostgresSQL用のドライバーを指定
     driver-class-name: org.postgresql.Driver
   jpa:

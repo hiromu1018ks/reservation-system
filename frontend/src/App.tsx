@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Header from './components/common/Header';
 import Navigation from './components/common/Navigation';
 import AuthPage from './pages/AuthPage';
@@ -9,7 +10,6 @@ import ReservationPage from './pages/ReservationPage';
 import ReservationManagementPage from './pages/ReservationManagementPage';
 import MyReservationsPage from './pages/MyReservationsPage';
 import UserManagementPage from './pages/UserManagementPage';
-import './App.css';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -24,7 +24,14 @@ const AppContent: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">読み込み中...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-800">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">読み込み中...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -51,11 +58,13 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="app">
+    <div className="min-h-screen bg-white dark:bg-gray-800 transition-colors duration-300">
       <Header />
       <Navigation currentPage={currentPage} onPageChange={handlePageChange} />
-      <main className="main-content">
-        {renderCurrentPage()}
+      <main className="container-responsive py-8">
+        <div className="animate-fadeIn">
+          {renderCurrentPage()}
+        </div>
       </main>
     </div>
   );
@@ -63,9 +72,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 
