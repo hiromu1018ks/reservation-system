@@ -1,42 +1,554 @@
-#root {
-  max-width: 1280px;
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header styles */
+.header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Navigation styles */
+.navigation {
+  background-color: #34495e;
+  padding: 0;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  overflow-x: auto;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  color: white;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+  background-color: #2c3e50;
+}
+
+.nav-item.active {
+  background-color: #3498db;
+  border-bottom-color: #2980b9;
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
+/* Loading and error states */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 1rem;
+}
+
+/* Auth page styles */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #ecf0f1;
+}
+
+.auth-container {
+  background: white;
   padding: 2rem;
-  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.auth-toggle {
+  display: flex;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #ddd;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.auth-toggle button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-toggle button.active {
+  background-color: #3498db;
+  color: white;
+}
+
+.auth-toggle button:hover:not(.active) {
+  background-color: #e9ecef;
+}
+
+/* Form styles */
+.login-form,
+.register-form,
+.facility-form,
+.reservation-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.login-form h2,
+.register-form h2,
+.facility-form h2,
+.reservation-form h2 {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #3498db;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.form-actions button[type="button"] {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #7f8c8d;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Facility styles */
+.facility-list h2 {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.search-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.search-group {
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+}
+
+.search-group input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.search-group button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.search-group button:first-of-type {
+  background-color: #3498db;
+  color: white;
+}
+
+.search-group button:first-of-type:hover {
+  background-color: #2980b9;
+}
+
+.search-group button:last-of-type {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.search-group button:last-of-type:hover {
+  background-color: #7f8c8d;
+}
+
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.facility-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.facility-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.facility-card h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.facility-description {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.facility-details p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.select-facility-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.select-facility-btn:hover {
+  background-color: #229954;
+}
+
+/* Table styles */
+.facilities-table,
+.reservations-table,
+.users-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.facilities-table table,
+.reservations-table table,
+.users-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.facilities-table th,
+.facilities-table td,
+.reservations-table th,
+.reservations-table td,
+.users-table th,
+.users-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.facilities-table th,
+.reservations-table th,
+.users-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #555;
+}
+
+.facilities-table tbody tr:hover,
+.reservations-table tbody tr:hover,
+.users-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Button styles */
+.add-facility-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.add-facility-btn:hover {
+  background-color: #229954;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+.approve-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.approve-btn:hover {
+  background-color: #229954;
+}
+
+.reject-btn {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.reject-btn:hover {
+  background-color: #e67e22;
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h2 {
+  color: #2c3e50;
+}
+
+/* Status badge */
+.status-badge {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Current user indicator */
+.current-user {
+  color: #3498db;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Facility info in reservation form */
+.facility-info {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.facility-info h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.facility-info p {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
   }
-  to {
-    transform: rotate(360deg);
+
+  .user-info {
+    flex-direction: column;
+    gap: 0.5rem;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .search-group {
+    flex-direction: column;
+    align-items: stretch;
   }
-}
 
-.card {
-  padding: 2em;
-}
+  .facilities-grid {
+    grid-template-columns: 1fr;
+  }
 
-.read-the-docs {
-  color: #888;
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .facilities-table,
+  .reservations-table,
+  .users-table {
+    overflow-x: auto;
+  }
+
+  .navigation {
+    flex-wrap: wrap;
+  }
+
+  .nav-item {
+    flex: 1;
+    min-width: 120px;
+  }
 }
