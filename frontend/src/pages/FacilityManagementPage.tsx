@@ -55,10 +55,18 @@ const FacilityManagementPage: React.FC = () => {
   };
 
   if (user?.role !== 'ADMIN') {
-    return <div className="error-message">管理者権限が必要です</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-gray-900">
+      <div className="text-center">
+        <div className="text-red-600 dark:text-red-400 text-lg font-medium">管理者権限が必要です</div>
+      </div>
+    </div>;
   }
 
-  if (isLoading) return <div>読み込み中...</div>;
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-gray-900">
+      <div className="text-gray-600 dark:text-gray-400">読み込み中...</div>
+    </div>
+  );
 
   if (showForm) {
     return (
@@ -71,64 +79,75 @@ const FacilityManagementPage: React.FC = () => {
   }
 
   return (
-    <div className="facility-management">
-      <div className="page-header">
-        <h2>施設管理</h2>
-        <button
-          className="add-facility-btn"
-          onClick={() => {
-            setSelectedFacility(null);
-            setShowForm(true);
-          }}
-        >
-          新規施設追加
-        </button>
-      </div>
+    <div className="min-h-screen bg-stone-50 dark:bg-gray-900">
+      <div className="container-responsive py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">施設管理</h1>
+          <button
+            className="btn-primary"
+            onClick={() => {
+              setSelectedFacility(null);
+              setShowForm(true);
+            }}
+          >
+            新規施設追加
+          </button>
+        </div>
 
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="facilities-table">
-        {facilities.length === 0 ? (
-          <p>登録されている施設がありません。</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>施設名</th>
-                <th>説明</th>
-                <th>収容人数</th>
-                <th>場所</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {facilities.map((facility) => (
-                <tr key={facility.id}>
-                  <td>{facility.name}</td>
-                  <td>{facility.description}</td>
-                  <td>{facility.capacity}人</td>
-                  <td>{facility.location}</td>
-                  <td>
-                    <button
-                      onClick={() => {
-                        setSelectedFacility(facility);
-                        setShowForm(true);
-                      }}
-                    >
-                      編集
-                    </button>
-                    <button
-                      onClick={() => handleDelete(facility.id)}
-                      className="delete-btn"
-                    >
-                      削除
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="text-red-700 dark:text-red-400">{error}</div>
+          </div>
         )}
+
+        <div className="card">
+          {facilities.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              登録されている施設がありません。
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">施設名</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">説明</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">収容人数</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">場所</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {facilities.map((facility) => (
+                    <tr key={facility.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{facility.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">{facility.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{facility.capacity}人</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{facility.location}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedFacility(facility);
+                            setShowForm(true);
+                          }}
+                          className="btn-secondary"
+                        >
+                          編集
+                        </button>
+                        <button
+                          onClick={() => handleDelete(facility.id)}
+                          className="btn-danger"
+                        >
+                          削除
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

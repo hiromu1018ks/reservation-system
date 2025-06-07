@@ -30,8 +30,10 @@ const ReservationPage: React.FC = () => {
   }
 
   return (
-    <div className="reservation-page">
-      <FacilityList onFacilitySelect={handleFacilitySelect} />
+    <div className="min-h-screen bg-stone-50 dark:bg-gray-900">
+      <div className="container-responsive py-8">
+        <FacilityList onFacilitySelect={handleFacilitySelect} />
+      </div>
     </div>
   );
 };
