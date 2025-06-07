@@ -29,6 +29,12 @@ public class UserServiceImpl implements UserService {
      * セキュリティのため、パスワードは平文ではなくハッシュ化して保存する
      */
     private final PasswordEncoder passwordEncoder;
+    
+    /**
+     * ユーザー関連のバリデーションを担当するサービス
+     * ビジネスルールの検証処理を分離して管理
+     */
+    private final UserValidationService userValidationService;
 
     /**
      * 指定されたIDのユーザー情報をDTOとして取得する
@@ -85,14 +91,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional  // トランザクション管理を有効化
     public UserDTO register(UserRegistrationDTO registrationDTO) {
-        // ユーザー名の重複チェック
-        if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-            throw new IllegalArgumentException("このユーザー名は既に使用されています");
-        }
-        // メールアドレスの重複チェック
-        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            throw new IllegalArgumentException("このメールアドレスは既に使用されています");
-        }
+        // バリデーションサービスを使用してビジネスルールを検証
+        userValidationService.validateUserRegistration(registrationDTO);
 
         // 新規ユーザーエンティティの作成
         User user = new User();

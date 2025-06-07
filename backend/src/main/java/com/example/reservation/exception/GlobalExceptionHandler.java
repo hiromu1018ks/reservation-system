@@ -1,5 +1,6 @@
 package com.example.reservation.exception;
 
+import com.example.reservation.model.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

@@ -2,8 +2,7 @@ package com.example.reservation.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * ユーザー情報を表すエンティティクラス
@@ -12,7 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Data // Lombokアノテーション：getter、setter、equals、hashCode、toStringメソッドを自動生成
-public class User {
+@EqualsAndHashCode(callSuper = false) // スーパークラスのequals/hashCodeを呼び出さない
+public class User extends BaseEntity {
     /**
      * ユーザーID（主キー）
      * 自動採番される
@@ -52,38 +52,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    /**
-     * レコード作成日時
-     * NULL不可、作成後は更新されない
-     */
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    /**
-     * レコード最終更新日時
-     * NULL不可
-     */
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    /**
-     * エンティティ保存前に自動実行されるメソッド
-     * 作成日時と更新日時を現在時刻に設定する
-     */
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    /**
-     * エンティティ更新前に自動実行されるメソッド
-     * 更新日時を現在時刻に設定する
-     */
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     /**
      * ユーザーの役割（権限）を表す列挙型
