@@ -1,8 +1,8 @@
 spring:
   datasource:
     # データベース接続URL - PostgresSQLデータベースに接続するための設定
-    # db:5432 はデータベースのホスト名とポート番号、reservationはデータベース名
-    url: jdbc:postgresql://db:5432/reservation
+    # localhost:5432 はデータベースのホスト名とポート番号、reservationはデータベース名
+    url: jdbc:postgresql://localhost:5432/reservation
     # データベースへの接続ユーザー名
     username: postgres
     # データベース接続パスワード（本番環境では環境変数などから取得することを推奨）
@@ -14,7 +14,7 @@ spring:
       # データベーススキーマの自動生成設定
       # validate: 既存のスキーマと一致するか検証するだけで変更はしない
       # 他の選択肢: create, create-drop, update, none
-      ddl-auto: validate  # 本番環境ではvalidateを使用（スキーマは手動管理）
+      ddl-auto: update  # 開発環境用：スキーマを自動的に更新
     # SQLクエリをログに出力するかどうか
     show-sql: true
     properties:

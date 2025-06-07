@@ -1,7 +1,5 @@
 package com.example.reservation.config;
 
-import java.util.Arrays;
-
 import com.example.reservation.security.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 /**
  * Spring Securityの設定クラス
  * アプリケーション全体のセキュリティ設定を管理します
@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     /**
      * コンストラクタ - 依存性の注入
-     * 
+     *
      * @param jwtRequestFilter JWT認証フィルター
      */
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
@@ -61,26 +61,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // CORSの設定を適用
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // CSRF保護を無効化（RESTful APIのため）
-            .csrf(csrf -> csrf.disable())
-            // エンドポイントごとのアクセス制御を設定
-            .authorizeHttpRequests(authz -> authz
-                // 認証不要のエンドポイント
-                .requestMatchers("/api/users/register","/api/auth/**").permitAll()
-                // 一般ユーザーと管理者がアクセス可能なエンドポイント
-                .requestMatchers("/api/facilities/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
-                // 管理者専用エンドポイント
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                // その他のエンドポイントは認証が必要
-                .anyRequest().authenticated()
-            )
-            // セッション管理をステートレスに設定（JWT認証のため）
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // JWTフィルターを追加
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                // CORSの設定を適用
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // CSRF保護を無効化（RESTful APIのため）
+                .csrf(csrf -> csrf.disable())
+                // エンドポイントごとのアクセス制御を設定
+                .authorizeHttpRequests(authz -> authz
+                        // 認証不要のエンドポイント
+                        .requestMatchers("/api/users/register", "/api/auth/**").permitAll()
+                        // 一般ユーザーと管理者がアクセス可能なエンドポイント
+                        .requestMatchers("/api/facilities/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
+                        // 管理者専用エンドポイント
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // その他のエンドポイントは認証が必要
+                        .anyRequest().authenticated()
+                )
+                // セッション管理をステートレスに設定（JWT認証のため）
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // JWTフィルターを追加
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -96,7 +96,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // フロントエンドのオリジンのみを許可
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         // 必要なHTTPメソッドを許可
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // すべてのヘッダーを許可

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    
+
     /**
      * CORSの設定を行う
      * フロントエンド（localhost:3000）からのリクエストを許可する
@@ -21,9 +21,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")  // すべてのエンドポイントに対してCORSを有効化
-            .allowedOrigins("http://localhost:3000")  // フロントエンドのオリジンを許可
-            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")  // 許可するHTTPメソッド
-            .allowedHeaders("*")  // すべてのヘッダーを許可
-            .allowCredentials(true);  // クレデンシャル（Cookie等）の送信を許可
+                .allowedOrigins("http://localhost:5173")  // フロントエンドのオリジンを許可
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")  // 許可するHTTPメソッド
+                .allowedHeaders("*")  // すべてのヘッダーを許可
+                .allowCredentials(true);  // クレデンシャル（Cookie等）の送信を許可
     }
 }
