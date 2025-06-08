@@ -99,6 +99,21 @@ public class UserController {
     }
 
     /**
+     * 認証済みユーザーの現在の情報を取得するエンドポイント
+     * HTTPメソッド: GET
+     * URL: /api/users/me
+     *
+     * @param authentication 現在ログイン中のユーザー認証情報（Spring Securityにより自動的に提供）
+     * @return 現在のユーザー情報（DTOオブジェクト形式）
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        UserDTO currentUser = userService.findById(userId);
+        return ResponseEntity.ok(currentUser);
+    }
+
+    /**
      * 認証済みユーザーのプロフィール情報を更新するエンドポイント
      * HTTPメソッド: PUT
      * URL: /api/users/profile

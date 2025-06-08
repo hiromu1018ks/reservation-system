@@ -8,7 +8,7 @@ import PasswordChangeForm from '../components/profile/PasswordChangeForm';
 
 const ProfilePage: React.FC = () => {
   const { user: contextUser, updateUser } = useContext(AuthContext);
-  const [user, setUser] = useState<User | null>(contextUser);
+  const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'avatar' | 'password'>('profile');
   const [loading, setLoading] = useState({
     profile: false,
@@ -18,9 +18,7 @@ const ProfilePage: React.FC = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    if (contextUser) {
-      setUser(contextUser);
-    }
+    setUser(contextUser);
   }, [contextUser]);
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -36,7 +34,6 @@ const ProfilePage: React.FC = () => {
       const response = await userApi.updateProfile(profileData);
       const updatedUser = response.data;
       
-      setUser(updatedUser);
       updateUser(updatedUser);
       showMessage('success', 'プロフィールを更新しました');
     } catch (error: any) {
@@ -56,7 +53,6 @@ const ProfilePage: React.FC = () => {
       const response = await userApi.uploadAvatar(file);
       const updatedUser = response.data;
       
-      setUser(updatedUser);
       updateUser(updatedUser);
       showMessage('success', 'アバター画像を更新しました');
     } catch (error: any) {

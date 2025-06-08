@@ -43,6 +43,9 @@ export const userApi = {
   register: (userData: UserRegistration) => api.post<User>('/users/register', userData),
   delete: (id: number) => api.delete(`/users/${id}`),
   
+  // 現在のユーザー情報を取得
+  getCurrentUser: () => api.get<User>('/users/me'),
+  
   // プロフィール管理機能
   updateProfile: (profileData: ProfileUpdate) => 
     api.put<User>('/users/profile', profileData),

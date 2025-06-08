@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { User, LoginRequest, UserRegistration } from '../types';
-import { authApi } from '../services/api';
+import { authApi, userApi } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -35,50 +35,55 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      
+      if (storedToken) {
+        setToken(storedToken);
+        try {
+          // APIから最新のユーザー情報を取得
+          const response = await userApi.getCurrentUser();
+          const currentUser = response.data;
+          setUser(currentUser);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+        } catch (error) {
+          console.error('Failed to fetch current user:', error);
+          // APIエラーの場合はトークンをクリア
+          setToken(null);
+          setUser(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await authApi.login(credentials);
-      const { 
-        token: authToken, 
-        id, 
-        username, 
-        email, 
-        role,
-        displayName,
-        bio,
-        avatarPath,
-        phoneNumber,
-        createdAt,
-        updatedAt
-      } = response.data;
+      const { token: authToken } = response.data;
       
-      const userData: User = {
-        id,
-        username,
-        email,
-        role: role as 'USER' | 'ADMIN',
-        displayName,
-        bio,
-        avatarPath,
-        phoneNumber,
-        createdAt,
-        updatedAt,
-      };
-
       setToken(authToken);
-      setUser(userData);
       localStorage.setItem('token', authToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // ログイン後にAPIから最新のユーザー情報を取得
+      try {
+        const userResponse = await userApi.getCurrentUser();
+        const currentUser = userResponse.data;
+        setUser(currentUser);
+        localStorage.setItem('user', JSON.stringify(currentUser));
+      } catch (userError) {
+        console.error('Failed to fetch user after login:', userError);
+        // ユーザー情報取得に失敗した場合、ログイン情報をクリア
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        throw new Error('ユーザー情報の取得に失敗しました');
+      }
     } catch (error) {
       throw error;
     }
