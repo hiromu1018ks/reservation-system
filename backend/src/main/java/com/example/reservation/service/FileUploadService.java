@@ -37,8 +37,9 @@ public class FileUploadService {
         // ファイルのバリデーションを実行（空でないか、サイズ制限内か、許可された形式か）
         validateFile(file);
 
-        // 設定から取得したアップロード先ディレクトリのPathオブジェクトを作成
-        Path uploadPath = Paths.get(fileUploadProperties.getUploadDir());
+        // プロジェクトルートからの絶対パスでアップロード先ディレクトリを作成
+        String projectRoot = System.getProperty("user.dir");
+        Path uploadPath = Paths.get(projectRoot, fileUploadProperties.getUploadDir());
 
         // アップロードディレクトリが存在しない場合は作成
         if (!Files.exists(uploadPath)) {
@@ -59,8 +60,8 @@ public class FileUploadService {
         // ファイルをコピー（同名ファイルがある場合は上書き）
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // 保存されたファイルのパスを返却
-        return filePath.toString();
+        // Web経由でアクセス可能な相対パスを返却
+        return "uploads/avatars/" + newFilename;
     }
 
     /**

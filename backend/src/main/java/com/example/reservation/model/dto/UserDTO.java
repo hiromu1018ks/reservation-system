@@ -58,6 +58,18 @@ public class UserDTO {
     private String phoneNumber;
 
     /**
+     * 作成日時
+     * ユーザーアカウントが作成された日時
+     */
+    private String createdAt;
+
+    /**
+     * 更新日時
+     * ユーザー情報が最後に更新された日時
+     */
+    private String updatedAt;
+
+    /**
      * ユーザーエンティティからDTOオブジェクトを生成する静的ファクトリメソッド
      *
      * @param user 変換元となるユーザーエンティティ
@@ -75,6 +87,8 @@ public class UserDTO {
         dto.setBio(user.getBio());
         dto.setAvatarPath(user.getAvatarPath());
         dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setCreatedAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
+        dto.setUpdatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null);
         // 作成したDTOを返却
         return dto;
     }

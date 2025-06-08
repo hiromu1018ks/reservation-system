@@ -3,6 +3,10 @@ export interface User {
   username: string;
   email: string;
   role: 'USER' | 'ADMIN';
+  displayName?: string;
+  bio?: string;
+  avatarPath?: string;
+  phoneNumber?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +28,12 @@ export interface LoginResponse {
   username: string;
   email: string;
   role: string;
+  displayName?: string;
+  bio?: string;
+  avatarPath?: string;
+  phoneNumber?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Facility {
@@ -61,3 +71,17 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+export interface ProfileUpdate {
+  displayName?: string;
+  email?: string;
+  bio?: string;
+  phoneNumber?: string;
+}
+
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+

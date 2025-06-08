@@ -69,6 +69,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // 認証不要のエンドポイント
                         .requestMatchers("/api/users/register", "/api/auth/**").permitAll()
+                        // 静的ファイル（アバター画像等）へのアクセスを許可
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/files/**").permitAll()
+                        .requestMatchers("/api/files/debug/**").permitAll()
                         // 一般ユーザーと管理者がアクセス可能なエンドポイント
                         .requestMatchers("/api/facilities/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
@@ -98,8 +102,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // フロントエンドのオリジンのみを許可
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        // フロントエンドのオリジンを許可
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:5175"));
         // 必要なHTTPメソッドを許可
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // すべてのヘッダーを許可

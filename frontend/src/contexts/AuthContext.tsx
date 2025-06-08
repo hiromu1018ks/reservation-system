@@ -8,11 +8,14 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: UserRegistration) => Promise<void>;
   logout: () => void;
+  updateUser: (userData: User) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export { AuthContext };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -45,15 +48,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await authApi.login(credentials);
-      const { token: authToken, id, username, email, role } = response.data;
+      const { 
+        token: authToken, 
+        id, 
+        username, 
+        email, 
+        role,
+        displayName,
+        bio,
+        avatarPath,
+        phoneNumber,
+        createdAt,
+        updatedAt
+      } = response.data;
       
       const userData: User = {
         id,
         username,
         email,
         role: role as 'USER' | 'ADMIN',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        displayName,
+        bio,
+        avatarPath,
+        phoneNumber,
+        createdAt,
+        updatedAt,
       };
 
       setToken(authToken);
@@ -80,12 +99,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value: AuthContextType = {
     user,
     token,
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user && !!token,
     isLoading,
   };

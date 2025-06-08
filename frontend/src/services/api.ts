@@ -6,7 +6,9 @@ import type {
   LoginResponse, 
   Facility, 
   Reservation, 
-  ReservationCreate 
+  ReservationCreate,
+  ProfileUpdate,
+  PasswordChange
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -40,6 +42,23 @@ export const userApi = {
   getByUsername: (username: string) => api.get<User>(`/users/username/${username}`),
   register: (userData: UserRegistration) => api.post<User>('/users/register', userData),
   delete: (id: number) => api.delete(`/users/${id}`),
+  
+  // プロフィール管理機能
+  updateProfile: (profileData: ProfileUpdate) => 
+    api.put<User>('/users/profile', profileData),
+  
+  uploadAvatar: (avatarFile: File) => {
+    const formData = new FormData();
+    formData.append('avatar', avatarFile);
+    return api.post<User>('/users/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  changePassword: (passwordData: PasswordChange) => 
+    api.put('/users/password', passwordData),
 };
 
 export const facilityApi = {

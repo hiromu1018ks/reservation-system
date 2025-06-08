@@ -10,6 +10,7 @@ import ReservationPage from './pages/ReservationPage';
 import ReservationManagementPage from './pages/ReservationManagementPage';
 import MyReservationsPage from './pages/MyReservationsPage';
 import UserManagementPage from './pages/UserManagementPage';
+import ProfilePage from './pages/ProfilePage';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -52,6 +53,8 @@ const AppContent: React.FC = () => {
         return <UserManagementPage />;
       case 'facilityManagement':
         return <FacilityManagementPage />;
+      case 'profile':
+        return <ProfilePage />;
       default:
         return <FacilityList />;
     }

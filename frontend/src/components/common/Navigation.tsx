@@ -13,6 +13,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage, onPageChange }) =>
     { key: 'facilities', label: '施設一覧', icon: '■', requireAuth: false },
     { key: 'reservations', label: '予約する', icon: '+', requireAuth: true },
     { key: 'myReservations', label: 'マイ予約', icon: '□', requireAuth: true },
+    { key: 'profile', label: 'プロフィール', icon: '👤', requireAuth: true },
   ];
 
   if (user?.role === 'ADMIN') {
