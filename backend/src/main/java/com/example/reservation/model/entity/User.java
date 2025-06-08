@@ -61,4 +61,40 @@ public class User extends BaseEntity {
     public enum Role {
         USER, ADMIN
     }
+
+    /**
+     * 表示名
+     * ユーザーがアプリケーション内で表示される名前
+     * 実名やニックネームなど、ユーザー自身が設定できる
+     * 最大100文字まで設定可能
+     */
+    @Column(length = 100)
+    private String displayName;
+
+    /**
+     * プロフィール文
+     * ユーザー自身の紹介文や経歴などを記述するフィールド
+     * ユーザープロフィールページなどで表示される
+     * 最大500文字まで設定可能
+     */
+    @Column(length = 500)
+    private String bio;
+
+    /**
+     * アバター画像のパス
+     * ユーザーのプロフィール画像ファイルへのパス情報を保持
+     * サーバー上のファイルパスまたはURL形式で保存
+     * 最大255文字まで設定可能
+     */
+    @Column(length = 255)
+    private String avatarPath;
+
+    /**
+     * 電話番号
+     * ユーザーの連絡先として使用される電話番号
+     * 国際番号形式やハイフンを含めて最大20文字まで設定可能
+     * アカウント確認や二要素認証などに使用される場合もある
+     */
+    @Column(length = 20)
+    private String phoneNumber;
 }

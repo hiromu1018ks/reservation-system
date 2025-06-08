@@ -34,6 +34,30 @@ public class UserDTO {
     private User.Role role;
 
     /**
+     * 表示名
+     * ユーザーがアプリケーション内で表示される名前
+     */
+    private String displayName;
+
+    /**
+     * 自己紹介文
+     * ユーザーのプロフィールページに表示される自己紹介
+     */
+    private String bio;
+
+    /**
+     * アバター画像のパス
+     * ユーザーのプロフィール画像ファイルへのパス情報
+     */
+    private String avatarPath;
+
+    /**
+     * 電話番号
+     * ユーザーの連絡先として使用される電話番号
+     */
+    private String phoneNumber;
+
+    /**
      * ユーザーエンティティからDTOオブジェクトを生成する静的ファクトリメソッド
      *
      * @param user 変換元となるユーザーエンティティ
@@ -47,6 +71,10 @@ public class UserDTO {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
+        dto.setDisplayName(user.getDisplayName());
+        dto.setBio(user.getBio());
+        dto.setAvatarPath(user.getAvatarPath());
+        dto.setPhoneNumber(user.getPhoneNumber());
         // 作成したDTOを返却
         return dto;
     }

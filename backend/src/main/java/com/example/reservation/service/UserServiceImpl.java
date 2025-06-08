@@ -1,20 +1,31 @@
 package com.example.reservation.service;
 
+import com.example.reservation.exception.DuplicateUserException;
+import com.example.reservation.exception.IllegalOperationException;
+import com.example.reservation.exception.ResourceNotFoundException;
+import com.example.reservation.model.dto.PasswordChangeDTO;
+import com.example.reservation.model.dto.ProfileUpdateDTO;
 import com.example.reservation.model.dto.UserDTO;
 import com.example.reservation.model.dto.UserRegistrationDTO;
 import com.example.reservation.model.entity.User;
 import com.example.reservation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
  * ユーザー関連のビジネスロジックを実装するサービスクラス
  * UserServiceインターフェースを実装し、ユーザー情報の取得・登録・削除などの機能を提供する
  */
+@Slf4j
 @Service  // Springのサービスコンポーネントとして登録
 @RequiredArgsConstructor  // Lombokによる必須フィールドを引数とするコンストラクタを自動生成
 public class UserServiceImpl implements UserService {
@@ -29,12 +40,17 @@ public class UserServiceImpl implements UserService {
      * セキュリティのため、パスワードは平文ではなくハッシュ化して保存する
      */
     private final PasswordEncoder passwordEncoder;
-    
+
     /**
      * ユーザー関連のバリデーションを担当するサービス
      * ビジネスルールの検証処理を分離して管理
      */
     private final UserValidationService userValidationService;
+    /**
+     * ファイルアップロード処理を担当するサービス
+     * ユーザーのアバター画像などのアップロード処理を行う
+     */
+    private final FileUploadService fileUploadService;
 
     /**
      * 指定されたIDのユーザー情報をDTOとして取得する
@@ -47,7 +63,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(Long id) {
         // リポジトリからユーザーを検索し、存在しない場合は例外をスロー
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ユーザが見つかりません。"));
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザが見つかりません。"));
         // エンティティをDTOに変換して返却
         return UserDTO.fromEntity(user);
     }
@@ -63,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findByUsername(String username) {
         // リポジトリからユーザー名でユーザーを検索し、存在しない場合は例外をスロー
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("ユーザが見つかりません。"));
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザが見つかりません。"));
         // エンティティをDTOに変換して返却
         return UserDTO.fromEntity(user);
     }
@@ -149,5 +165,114 @@ public class UserServiceImpl implements UserService {
         // ユーザーリポジトリを使用して、指定されたメールアドレスが既にデータベースに存在するかを確認
         // 存在する場合はtrueを返し、存在しない場合はfalseを返す
         return userRepository.existsByEmail(email);
+    }
+
+    /**
+     * ユーザーのプロフィール情報を更新する
+     *
+     * @param userId           ユーザーID
+     * @param profileUpdateDTO 更新するプロフィール情報を含むDTO
+     * @return 更新後のユーザー情報DTO
+     * @throws ResourceNotFoundException 指定されたIDのユーザーが存在しない場合
+     * @throws DuplicateUserException    更新するメールアドレスが他のユーザーで既に使用されている場合
+     */
+    @Override
+    @Transactional
+    public UserDTO updateProfile(Long userId, ProfileUpdateDTO profileUpdateDTO) {
+        // 指定されたIDのユーザーを取得（存在しない場合は例外をスロー）
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザーが見つかりません"));
+
+        // メールアドレスの変更がある場合、重複チェックを行う
+        if (profileUpdateDTO.getEmail() != null &&
+                !profileUpdateDTO.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(profileUpdateDTO.getEmail())) {
+                throw new DuplicateUserException("このメールアドレスは既に使用されています");
+            }
+        }
+
+        // 各フィールドが指定されている場合のみ更新
+        if (profileUpdateDTO.getDisplayName() != null) {
+            user.setDisplayName(profileUpdateDTO.getDisplayName());
+        }
+        if (profileUpdateDTO.getEmail() != null) {
+            user.setEmail(profileUpdateDTO.getEmail());
+        }
+        if (profileUpdateDTO.getBio() != null) {
+            user.setBio(profileUpdateDTO.getBio());
+        }
+        if (profileUpdateDTO.getPhoneNumber() != null) {
+            user.setPhoneNumber(profileUpdateDTO.getPhoneNumber());
+        }
+
+        // 更新したユーザー情報を保存し、DTOに変換して返却
+        User updatedUser = userRepository.save(user);
+        return UserDTO.fromEntity(updatedUser);
+    }
+
+    /**
+     * ユーザーのアバター画像を更新する
+     *
+     * @param userId     ユーザーID
+     * @param avatarFile アップロードされたアバター画像ファイル
+     * @return 更新後のユーザー情報DTO
+     * @throws ResourceNotFoundException 指定されたIDのユーザーが存在しない場合
+     * @throws IOException               ファイル操作中にエラーが発生した場合
+     */
+    @Override
+    @Transactional
+    public UserDTO updateAvatar(Long userId, MultipartFile avatarFile) throws IOException {
+        // 指定されたIDのユーザーを取得（存在しない場合は例外をスロー）
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザーが見つかりません"));
+
+        // 既存のアバター画像がある場合は削除
+        if (user.getAvatarPath() != null) {
+            try {
+                Files.deleteIfExists(Paths.get(user.getAvatarPath()));
+            } catch (IOException e) {
+                // 削除に失敗した場合はログに記録するが処理は続行
+                log.warn("古いアバター画像の削除に失敗しました: {}", e.getMessage());
+            }
+        }
+
+        // 新しいアバター画像をアップロード
+        String avatarPath = fileUploadService.uploadAvatar(avatarFile, userId);
+        user.setAvatarPath(avatarPath);
+
+        // 更新したユーザー情報を保存し、DTOに変換して返却
+        User updatedUser = userRepository.save(user);
+        return UserDTO.fromEntity(updatedUser);
+    }
+
+    /**
+     * ユーザーのパスワードを変更する
+     *
+     * @param userId            ユーザーID
+     * @param passwordChangeDTO パスワード変更情報を含むDTO
+     * @throws ResourceNotFoundException 指定されたIDのユーザーが存在しない場合
+     * @throws IllegalOperationException 現在のパスワードが正しくない場合や、新パスワードと確認パスワードが一致しない場合
+     */
+    @Override
+    @Transactional
+    public void changePassword(Long userId, PasswordChangeDTO passwordChangeDTO) {
+        // 指定されたIDのユーザーを取得（存在しない場合は例外をスロー）
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("ユーザーが見つかりません"));
+
+        // 新しいパスワードと確認パスワードが一致するか検証
+        if (!passwordChangeDTO.getNewPassword().equals(passwordChangeDTO.getConfirmPassword())) {
+            throw new IllegalOperationException("新しいパスワードと確認パスワードが一致しません");
+        }
+
+        // 現在のパスワードが正しいか検証
+        if (!passwordEncoder.matches(passwordChangeDTO.getCurrentPassword(), user.getPasswordHash())) {
+            throw new IllegalOperationException("現在のパスワードが正しくありません");
+        }
+
+        // 新しいパスワードをハッシュ化して保存
+        String hashedNewPassword = passwordEncoder.encode(passwordChangeDTO.getNewPassword());
+        user.setPasswordHash(hashedNewPassword);
+        userRepository.save(user);
     }
 }

@@ -74,6 +74,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
                         // 管理者専用エンドポイント
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/profile").authenticated()
+                        .requestMatchers("/api/users/avatar").authenticated()
+                        .requestMatchers("/api/users/password").authenticated()
                         // その他のエンドポイントは認証が必要
                         .anyRequest().authenticated()
                 )

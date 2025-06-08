@@ -1,5 +1,8 @@
 package com.example.reservation.controller;
 
+import com.example.reservation.exception.IllegalOperationException;
+import com.example.reservation.model.dto.PasswordChangeDTO;
+import com.example.reservation.model.dto.ProfileUpdateDTO;
 import com.example.reservation.model.dto.UserDTO;
 import com.example.reservation.model.dto.UserRegistrationDTO;
 import com.example.reservation.service.UserService;
@@ -7,8 +10,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -90,5 +96,81 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();  // HTTP 204 No Content ステータスを返す
+    }
+
+    /**
+     * 認証済みユーザーのプロフィール情報を更新するエンドポイント
+     * HTTPメソッド: PUT
+     * URL: /api/users/profile
+     *
+     * @param authentication   現在ログイン中のユーザー認証情報（Spring Securityにより自動的に提供）
+     * @param profileUpdateDTO 更新するプロフィール情報（リクエストボディから抽出）
+     * @return 更新されたユーザー情報（DTOオブジェクト形式）
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateProfile(
+            Authentication authentication,
+            @Valid @RequestBody ProfileUpdateDTO profileUpdateDTO) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        UserDTO updatedUser = userService.updateProfile(userId, profileUpdateDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /**
+     * 認証済みユーザーのアバター画像をアップロードするエンドポイント
+     * HTTPメソッド: POST
+     * URL: /api/users/avatar
+     *
+     * @param authentication 現在ログイン中のユーザー認証情報（Spring Securityにより自動的に提供）
+     * @param avatarFile     アップロードされたアバター画像ファイル（マルチパートリクエストから抽出）
+     * @return 更新されたユーザー情報（DTOオブジェクト形式）
+     * @throws IllegalOperationException ファイルアップロード処理に失敗した場合に発生
+     */
+    @PostMapping("/avatar")
+    public ResponseEntity<UserDTO> uploadAvatar(
+            Authentication authentication,
+            @RequestParam("avatar") MultipartFile avatarFile) {
+        try {
+            Long userId = getUserIdFromAuthentication(authentication);
+            UserDTO updatedUser = userService.updateAvatar(userId, avatarFile);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IOException e) {
+            throw new IllegalOperationException("ファイルアップロードに失敗しました");
+        }
+    }
+
+    /**
+     * 認証済みユーザーのパスワードを変更するエンドポイント
+     * HTTPメソッド: PUT
+     * URL: /api/users/password
+     *
+     * @param authentication    現在ログイン中のユーザー認証情報（Spring Securityにより自動的に提供）
+     * @param passwordChangeDTO 現在のパスワードと新しいパスワード情報（リクエストボディから抽出）
+     * @return 処理成功時にHTTPステータスコード200（OK）を含むレスポンス
+     */
+    @PutMapping("/password")
+    public ResponseEntity<Void> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody PasswordChangeDTO passwordChangeDTO) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        userService.changePassword(userId, passwordChangeDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 認証情報からユーザーIDを取得するプライベートヘルパーメソッド
+     *
+     * @param authentication Spring Securityが提供する認証情報
+     * @return 認証されたユーザーのID
+     * <p>
+     * 処理手順:
+     * 1. 認証情報からユーザー名を取得
+     * 2. ユーザー名を使ってユーザーサービスからユーザー情報を検索
+     * 3. 取得したユーザー情報からIDを返却
+     */
+    private Long getUserIdFromAuthentication(Authentication authentication) {
+        String username = authentication.getName();
+        UserDTO user = userService.findByUsername(username);
+        return user.getId();
     }
 }

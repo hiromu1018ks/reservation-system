@@ -1,8 +1,12 @@
 package com.example.reservation.service;
 
+import com.example.reservation.model.dto.PasswordChangeDTO;
+import com.example.reservation.model.dto.ProfileUpdateDTO;
 import com.example.reservation.model.dto.UserDTO;
 import com.example.reservation.model.dto.UserRegistrationDTO;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -76,4 +80,42 @@ public interface UserService {
      * Spring Data JPAによって自動的に実装され、メソッド名からクエリが生成されます。
      */
     boolean existsByEmail(String email);
+
+    /**
+     * ユーザープロファイル情報を更新するメソッド
+     *
+     * @param userId           更新対象のユーザーID
+     * @param profileUpdateDTO 更新するプロファイル情報を含むDTO
+     *                         （名前、メールアドレスなどの更新可能な項目を含む）
+     * @return 更新後のユーザー情報を含むUserDTOオブジェクト
+     * @throws IllegalArgumentException 指定されたIDのユーザーが存在しない場合や
+     *                                  更新内容が無効な場合（例：既に使用されているメールアドレス）
+     */
+    UserDTO updateProfile(Long userId, ProfileUpdateDTO profileUpdateDTO);
+
+    /**
+     * ユーザーのアバター画像（プロフィール画像）を更新するメソッド
+     *
+     * @param userId     アバターを更新するユーザーのID
+     * @param avatarFile アップロードされた新しいアバター画像ファイル
+     *                   （MultipartFileとして受け取り、適切な形式に処理される）
+     * @return 更新後のユーザー情報を含むUserDTOオブジェクト
+     * @throws IllegalArgumentException      指定されたIDのユーザーが存在しない場合
+     * @throws IOException                   ファイル処理中にエラーが発生した場合
+     * @throws UnsupportedMediaTypeException サポートされていないファイル形式の場合
+     */
+    UserDTO updateAvatar(Long userId, MultipartFile avatarFile) throws IOException;
+
+    /**
+     * ユーザーのパスワードを変更するメソッド
+     *
+     * @param userId            パスワードを変更するユーザーのID
+     * @param passwordChangeDTO パスワード変更情報を含むDTO
+     *                          （現在のパスワードと新しいパスワードを含む）
+     * @throws IllegalArgumentException    指定されたIDのユーザーが存在しない場合
+     * @throws InvalidCredentialsException 現在のパスワードが一致しない場合
+     * @throws InvalidPasswordException    新しいパスワードが要件を満たさない場合
+     *                                     （例：最小長さ、複雑さの要件）
+     */
+    void changePassword(Long userId, PasswordChangeDTO passwordChangeDTO);
 }
